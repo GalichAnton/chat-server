@@ -32,18 +32,14 @@ func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) 
 	log.Printf("Message = %s received", req.GetText())
 	log.Printf("Context =%v", ctx)
 
-	empty := emptypb.Empty{}
-
-	return &empty, nil
+	return nil, nil
 }
 
 func (s *server) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
 	log.Printf("Chat with [id]=%d deleted", req.GetId())
 	log.Printf("Context =%v", ctx)
 
-	empty := emptypb.Empty{}
-
-	return &empty, nil
+	return nil, nil
 }
 
 func main() {
