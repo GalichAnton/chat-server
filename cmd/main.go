@@ -2,55 +2,67 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"flag"
 	"log"
 	"net"
 
-	desc "github.com/GalichAnton/chat-server/pkg/chat_v1"
-	"github.com/brianvoe/gofakeit"
+	"github.com/GalichAnton/chat-server/cmd/server"
+	"github.com/GalichAnton/chat-server/internal/config"
+	"github.com/GalichAnton/chat-server/internal/config/env"
+	"github.com/GalichAnton/chat-server/internal/repository/pg"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/emptypb"
+
+	desc "github.com/GalichAnton/chat-server/pkg/chat_v1"
 )
 
-const grpcPort = 50051
+var configPath string
 
-type server struct {
-	desc.UnimplementedChatV1Server
-}
-
-func (s *server) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	log.Printf("Chat created: %v", req.GetUsernames())
-	log.Printf("Context =%v", ctx)
-
-	return &desc.CreateResponse{
-		Id: gofakeit.Int64(),
-	}, nil
-}
-
-func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
-	log.Printf("Message = %s received", req.GetText())
-	log.Printf("Context =%v", ctx)
-
-	return &emptypb.Empty{}, nil
-}
-
-func (s *server) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
-	log.Printf("Chat with [id]=%d deleted", req.GetId())
-	log.Printf("Context =%v", ctx)
-
-	return &emptypb.Empty{}, nil
+func init() {
+	flag.StringVar(&configPath, "config-path", ".env", "path to config file")
 }
 
 func main() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	flag.Parse()
+
+	err := config.Load(configPath)
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	grpcConfig, err := env.NewGRPCConfig()
+	if err != nil {
+		log.Fatalf("failed to parse gRPC config: %v", err)
+	}
+
+	pgConfig, err := env.NewPGConfig()
+	if err != nil {
+		log.Fatalf("failed to parse PG config: %v", err)
+	}
+
+	ctx := context.Background()
+	lis, err := net.Listen("tcp", grpcConfig.Address())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	pool, err := pgxpool.Connect(ctx, pgConfig.DSN())
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer pool.Close()
+
+	chatRepository := pg.NewChatRepository(pool)
+	messageRepository := pg.NewMessageRepository(pool)
+	userRepository := pg.NewUserRepository(pool)
+
 	s := grpc.NewServer()
 	reflection.Register(s)
-	desc.RegisterChatV1Server(s, &server{})
+
+	userServer := server.NewChatServer(chatRepository, userRepository, messageRepository)
+
+	desc.RegisterChatV1Server(s, userServer)
 
 	log.Printf("server listening at %v", lis.Addr())
 
