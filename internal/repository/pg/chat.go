@@ -11,6 +11,8 @@ import (
 
 const (
 	chatTableName = "chat"
+	colID         = "id"
+	colOwner      = "owner"
 )
 
 // ChatRepository - .
@@ -28,7 +30,7 @@ func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, er
 
 	builderInsert := sq.Insert(chatTableName).
 		PlaceholderFormat(sq.Dollar).
-		Columns("owner").
+		Columns(colOwner).
 		Values(chat.Owner).
 		Suffix("RETURNING id")
 
@@ -50,7 +52,7 @@ func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, er
 func (c *ChatRepository) Delete(ctx context.Context, id int64) error {
 	builderDelete := sq.Delete(chatTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": id})
+		Where(sq.Eq{colID: id})
 
 	query, args, err := builderDelete.ToSql()
 	if err != nil {

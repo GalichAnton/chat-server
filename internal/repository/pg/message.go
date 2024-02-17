@@ -10,6 +10,9 @@ import (
 
 const (
 	messageTableName = "message"
+	colChatID        = "chat_id"
+	colUserID        = "user_id"
+	colContent       = "content"
 )
 
 // MessageRepository - .
@@ -26,8 +29,8 @@ func NewMessageRepository(pool *pgxpool.Pool) *MessageRepository {
 func (m *MessageRepository) SendMessage(ctx context.Context, message *message.Info) error {
 	builderInsert := sq.Insert(messageTableName).
 		PlaceholderFormat(sq.Dollar).
-		Columns("chat_id", "user_id", "text").
-		Values(message.ChatID, message.From, message.Text).
+		Columns(colChatID, colUserID, colContent).
+		Values(message.ChatID, message.From, message.Content).
 		Suffix("RETURNING id")
 
 	query, args, err := builderInsert.ToSql()

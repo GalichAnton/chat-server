@@ -1,45 +1,45 @@
 -- +goose Up
 -- +goose StatementBegin
 --------------------------- ЧАТ ------------------------------------
-CREATE TABLE IF NOT EXISTS chat (
+create table if not exists chat (
     id serial primary key,
     owner int
 );
 
-COMMENT ON TABLE chat IS 'Таблица с чатами';
-COMMENT ON COLUMN chat.id IS 'Id чата';
-COMMENT ON COLUMN chat.owner IS 'Id создателя чата';
+comment on table chat is 'Таблица с чатами';
+comment on column chat.id is 'Id чата';
+comment on column chat.owner is 'Id создателя чата';
 
 --------------------------- ПОЛЬЗОВАТЕЛЬ ЧАТА ------------------------------------
-CREATE TABLE IF NOT EXISTS chat_user (
+create table if not exists chat_user (
     id serial primary key,
     chat_id int not null,
-    name varchar(255) not null,
-    foreign key (chat_id) references chat (id) ON DELETE CASCADE ON UPDATE CASCADE
+    name text not null,
+    foreign key (chat_id) references chat (id) on delete cascade on update cascade
 );
 
-COMMENT ON TABLE chat_user IS 'Таблица с пользователями определенного чата';
-COMMENT ON COLUMN chat_user.id IS 'Id пользователя';
-COMMENT ON COLUMN chat_user.name IS 'Имя пользователя';
-COMMENT ON COLUMN chat_user.chat_id IS 'Id чата, внешний ключ (связь с таблицей чатов)';
+comment on table chat_user is 'Таблица с пользователями определенного чата';
+comment on column chat_user.id is 'Id пользователя';
+comment on column chat_user.name is 'Имя пользователя';
+comment on column chat_user.chat_id is 'Id чата, внешний ключ (связь с таблицей чатов)';
 
 --------------------------- СООБЩЕНИЯ ------------------------------------
 
-CREATE TABLE IF NOT EXISTS message (
+create table if not exists message (
     id serial primary key,
-    timestamp timestamp not null default now(),
+    sent_at timestamp not null default now(),
     chat_id int not null,
     user_id int,
-    text text not null,
-    foreign key (chat_id) references chat (id) ON DELETE CASCADE ON UPDATE CASCADE
+    content text not null,
+    foreign key (chat_id) references chat (id) on delete cascade on update cascade
 );
 
-COMMENT ON TABLE message IS 'Таблица с сообщениями в чате';
-COMMENT ON COLUMN message.id IS 'Id сообщения';
-COMMENT ON COLUMN message.timestamp IS 'Время отправки сообщения';
-COMMENT ON COLUMN message.chat_id IS 'Id чата, внешний ключ (связь с таблицей чатов)';
-COMMENT ON COLUMN message.user_id IS 'Id пользователя отправившего сообщение';
-COMMENT ON COLUMN message.text IS 'Текст сообщения';
+comment on table message is 'Таблица с сообщениями в чате';
+comment on column message.id is 'Id сообщения';
+comment on column message.sent_at is 'Время отправки сообщения';
+comment on column message.chat_id is 'Id чата, внешний ключ (связь с таблицей чатов)';
+comment on column message.user_id is 'Id пользователя отправившего сообщение';
+comment on column message.content is 'Текст сообщения';
 -- +goose StatementEnd
 
 -- +goose Down

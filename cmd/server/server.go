@@ -69,9 +69,9 @@ func (s *ChatServer) Delete(ctx context.Context, req *desc.DeleteRequest) (*empt
 // SendMessage - .
 func (s *ChatServer) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
 	newMessage := message.Info{
-		ChatID: req.GetChatId(),
-		From:   req.GetFrom(),
-		Text:   req.GetText(),
+		ChatID:  req.GetChatId(),
+		From:    req.GetFrom(),
+		Content: req.GetText(),
 	}
 
 	err := s.messageRepository.SendMessage(ctx, &newMessage)

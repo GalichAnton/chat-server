@@ -10,6 +10,7 @@ import (
 
 const (
 	userTableName = "chat_user"
+	colName       = "name"
 )
 
 // UserRepository - .
@@ -26,7 +27,7 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 func (u *UserRepository) Create(ctx context.Context, user *user.User) (int64, error) {
 	builderInsert := sq.Insert(userTableName).
 		PlaceholderFormat(sq.Dollar).
-		Columns("name", "chat_id").
+		Columns(colName, colChatID).
 		Values(user.Name, user.ChatID).
 		Suffix("RETURNING id")
 
