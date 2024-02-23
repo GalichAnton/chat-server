@@ -1,10 +1,10 @@
-package pg
+package chat
 
 import (
 	"context"
 	"log"
 
-	"github.com/GalichAnton/chat-server/internal/models/chat"
+	modelService "github.com/GalichAnton/chat-server/internal/models/chat"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -15,19 +15,18 @@ const (
 	colOwner      = "owner"
 )
 
-// ChatRepository - .
-type ChatRepository struct {
+// Repository - .
+type Repository struct {
 	pool *pgxpool.Pool
 }
 
 // NewChatRepository - .
-func NewChatRepository(pool *pgxpool.Pool) *ChatRepository {
-	return &ChatRepository{pool: pool}
+func NewChatRepository(pool *pgxpool.Pool) *Repository {
+	return &Repository{pool: pool}
 }
 
 // Create - .
-func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, error) {
-
+func (c *Repository) Create(ctx context.Context, chat *modelService.Info) (int64, error) {
 	builderInsert := sq.Insert(chatTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(colOwner).
@@ -49,7 +48,7 @@ func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, er
 }
 
 // Delete - .
-func (c *ChatRepository) Delete(ctx context.Context, id int64) error {
+func (c *Repository) Delete(ctx context.Context, id int64) error {
 	builderDelete := sq.Delete(chatTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{colID: id})

@@ -1,9 +1,9 @@
-package pg
+package message
 
 import (
 	"context"
 
-	"github.com/GalichAnton/chat-server/internal/models/message"
+	modelService "github.com/GalichAnton/chat-server/internal/models/message"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -15,18 +15,18 @@ const (
 	colContent       = "content"
 )
 
-// MessageRepository - .
-type MessageRepository struct {
+// Repository - .
+type Repository struct {
 	pool *pgxpool.Pool
 }
 
 // NewMessageRepository - .
-func NewMessageRepository(pool *pgxpool.Pool) *MessageRepository {
-	return &MessageRepository{pool: pool}
+func NewMessageRepository(pool *pgxpool.Pool) *Repository {
+	return &Repository{pool: pool}
 }
 
 // SendMessage - .
-func (m *MessageRepository) SendMessage(ctx context.Context, message *message.Info) error {
+func (m *Repository) SendMessage(ctx context.Context, message *modelService.Info) error {
 	builderInsert := sq.Insert(messageTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(colChatID, colUserID, colContent).

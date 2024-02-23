@@ -6,10 +6,14 @@ import (
 	"log"
 	"net"
 
-	"github.com/GalichAnton/chat-server/cmd/server"
+	chatApi "github.com/GalichAnton/chat-server/internal/api/chat"
 	"github.com/GalichAnton/chat-server/internal/config"
 	"github.com/GalichAnton/chat-server/internal/config/env"
-	"github.com/GalichAnton/chat-server/internal/repository/pg"
+	chatRepo "github.com/GalichAnton/chat-server/internal/repository/chat"
+	"github.com/GalichAnton/chat-server/internal/repository/message"
+	"github.com/GalichAnton/chat-server/internal/repository/user"
+	chatService "github.com/GalichAnton/chat-server/internal/services/chat"
+	messageService "github.com/GalichAnton/chat-server/internal/services/message"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -53,16 +57,17 @@ func main() {
 	}
 	defer pool.Close()
 
-	chatRepository := pg.NewChatRepository(pool)
-	messageRepository := pg.NewMessageRepository(pool)
-	userRepository := pg.NewUserRepository(pool)
+	chatRepository := chatRepo.NewChatRepository(pool)
+	messageRepository := message.NewMessageRepository(pool)
+	userRepository := user.NewUserRepository(pool)
+
+	chatSrv := chatService.NewService(chatRepository, userRepository)
+	messageSrv := messageService.NewService(messageRepository)
 
 	s := grpc.NewServer()
 	reflection.Register(s)
 
-	userServer := server.NewChatServer(chatRepository, userRepository, messageRepository)
-
-	desc.RegisterChatV1Server(s, userServer)
+	desc.RegisterChatV1Server(s, chatApi.NewImplementation(chatSrv, messageSrv))
 
 	log.Printf("server listening at %v", lis.Addr())
 

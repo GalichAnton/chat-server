@@ -1,9 +1,9 @@
-package pg
+package user
 
 import (
 	"context"
 
-	"github.com/GalichAnton/chat-server/internal/models/user"
+	modelService "github.com/GalichAnton/chat-server/internal/models/user"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -11,20 +11,21 @@ import (
 const (
 	userTableName = "chat_user"
 	colName       = "name"
+	colChatID     = "chat_id"
 )
 
-// UserRepository - .
-type UserRepository struct {
+// Repository - .
+type Repository struct {
 	pool *pgxpool.Pool
 }
 
 // NewUserRepository - .
-func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
-	return &UserRepository{pool: pool}
+func NewUserRepository(pool *pgxpool.Pool) *Repository {
+	return &Repository{pool: pool}
 }
 
 // Create - .
-func (u *UserRepository) Create(ctx context.Context, user *user.User) (int64, error) {
+func (u *Repository) Create(ctx context.Context, user *modelService.User) (int64, error) {
 	builderInsert := sq.Insert(userTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(colName, colChatID).
