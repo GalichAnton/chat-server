@@ -40,6 +40,21 @@ comment on column message.sent_at is 'Время отправки сообщен
 comment on column message.chat_id is 'Id чата, внешний ключ (связь с таблицей чатов)';
 comment on column message.user_id is 'Id пользователя отправившего сообщение';
 comment on column message.content is 'Текст сообщения';
+
+create table if not exists logs (
+    id serial primary key,
+    action text not null,
+    entity_id int not null,
+    entity_type text not null,
+    created_at timestamp not null default now()
+);
+
+comment on table logs is 'Таблица с логами';
+comment on column logs.id is 'Id лога';
+comment on column logs.action is 'Действие над сущностью';
+comment on column logs.entity_id is 'Id сущности';
+comment on column logs.entity_type is 'Тип сущности';
+comment on column logs.created_at is 'Дата создания лога';
 -- +goose StatementEnd
 
 -- +goose Down

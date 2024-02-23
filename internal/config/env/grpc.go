@@ -8,7 +8,7 @@ import (
 	"github.com/GalichAnton/chat-server/internal/config"
 )
 
-var _ config.GRPC = (*GRPCConfig)(nil)
+var _ config.GRPCConfig = (*GRPCConfig)(nil)
 
 const (
 	grpcHostEnvName = "GRPC_HOST"

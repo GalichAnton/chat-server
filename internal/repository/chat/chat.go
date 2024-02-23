@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/GalichAnton/chat-server/internal/client/db"
 	modelService "github.com/GalichAnton/chat-server/internal/models/chat"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 const (
@@ -17,12 +17,12 @@ const (
 
 // Repository - .
 type Repository struct {
-	pool *pgxpool.Pool
+	db db.Client
 }
 
 // NewChatRepository - .
-func NewChatRepository(pool *pgxpool.Pool) *Repository {
-	return &Repository{pool: pool}
+func NewChatRepository(db db.Client) *Repository {
+	return &Repository{db: db}
 }
 
 // Create - .
@@ -38,8 +38,12 @@ func (c *Repository) Create(ctx context.Context, chat *modelService.Info) (int64
 		return 0, err
 	}
 
+	q := db.Query{
+		Name:     "chat_repository.Create",
+		QueryRaw: query,
+	}
 	var chatID int64
-	err = c.pool.QueryRow(ctx, query, args...).Scan(&chatID)
+	err = c.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
 	if err != nil {
 		return 0, err
 	}
@@ -58,7 +62,12 @@ func (c *Repository) Delete(ctx context.Context, id int64) error {
 		log.Fatalf("failed to build query: %v", err)
 	}
 
-	_, err = c.pool.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "chat_repository.Delete",
+		QueryRaw: query,
+	}
+
+	_, err = c.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}

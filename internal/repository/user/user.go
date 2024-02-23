@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 
+	"github.com/GalichAnton/chat-server/internal/client/db"
 	modelService "github.com/GalichAnton/chat-server/internal/models/user"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 const (
@@ -16,12 +16,12 @@ const (
 
 // Repository - .
 type Repository struct {
-	pool *pgxpool.Pool
+	db db.Client
 }
 
 // NewUserRepository - .
-func NewUserRepository(pool *pgxpool.Pool) *Repository {
-	return &Repository{pool: pool}
+func NewUserRepository(db db.Client) *Repository {
+	return &Repository{db: db}
 }
 
 // Create - .
@@ -37,8 +37,12 @@ func (u *Repository) Create(ctx context.Context, user *modelService.User) (int64
 		return 0, err
 	}
 
+	q := db.Query{
+		Name:     "user_repository.Create",
+		QueryRaw: query,
+	}
 	var userID int64
-	err = u.pool.QueryRow(ctx, query, args...).Scan(&userID)
+	err = u.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
 	if err != nil {
 		return 0, err
 	}

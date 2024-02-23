@@ -3,9 +3,9 @@ package message
 import (
 	"context"
 
+	"github.com/GalichAnton/chat-server/internal/client/db"
 	modelService "github.com/GalichAnton/chat-server/internal/models/message"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 const (
@@ -17,12 +17,12 @@ const (
 
 // Repository - .
 type Repository struct {
-	pool *pgxpool.Pool
+	db db.Client
 }
 
 // NewMessageRepository - .
-func NewMessageRepository(pool *pgxpool.Pool) *Repository {
-	return &Repository{pool: pool}
+func NewMessageRepository(db db.Client) *Repository {
+	return &Repository{db: db}
 }
 
 // SendMessage - .
@@ -38,8 +38,13 @@ func (m *Repository) SendMessage(ctx context.Context, message *modelService.Info
 		return err
 	}
 
+	q := db.Query{
+		Name:     "message_repository.SendMessage",
+		QueryRaw: query,
+	}
+
 	var messageID int64
-	err = m.pool.QueryRow(ctx, query, args...).Scan(&messageID)
+	err = m.db.DB().QueryRowContext(ctx, q, args...).Scan(&messageID)
 	if err != nil {
 		return err
 	}
