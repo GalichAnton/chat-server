@@ -2,7 +2,6 @@ package chat
 
 import (
 	"context"
-	"log"
 
 	"github.com/GalichAnton/chat-server/internal/converter/message"
 	desc "github.com/GalichAnton/chat-server/pkg/chat_v1"
@@ -15,8 +14,6 @@ func (i *Implementation) SendMessage(ctx context.Context, req *desc.SendMessageR
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("created message")
 
 	return &emptypb.Empty{}, nil
 }
