@@ -1,12 +1,12 @@
-package pg
+package chat
 
 import (
 	"context"
 	"log"
 
-	"github.com/GalichAnton/chat-server/internal/models/chat"
+	"github.com/GalichAnton/chat-server/internal/client/db"
+	modelService "github.com/GalichAnton/chat-server/internal/models/chat"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 const (
@@ -15,19 +15,18 @@ const (
 	colOwner      = "owner"
 )
 
-// ChatRepository - .
-type ChatRepository struct {
-	pool *pgxpool.Pool
+// Repository - .
+type Repository struct {
+	db db.Client
 }
 
 // NewChatRepository - .
-func NewChatRepository(pool *pgxpool.Pool) *ChatRepository {
-	return &ChatRepository{pool: pool}
+func NewChatRepository(db db.Client) *Repository {
+	return &Repository{db: db}
 }
 
 // Create - .
-func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, error) {
-
+func (c *Repository) Create(ctx context.Context, chat *modelService.Info) (int64, error) {
 	builderInsert := sq.Insert(chatTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(colOwner).
@@ -39,8 +38,12 @@ func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, er
 		return 0, err
 	}
 
+	q := db.Query{
+		Name:     "chat_repository.Create",
+		QueryRaw: query,
+	}
 	var chatID int64
-	err = c.pool.QueryRow(ctx, query, args...).Scan(&chatID)
+	err = c.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
 	if err != nil {
 		return 0, err
 	}
@@ -49,7 +52,7 @@ func (c *ChatRepository) Create(ctx context.Context, chat *chat.Info) (int64, er
 }
 
 // Delete - .
-func (c *ChatRepository) Delete(ctx context.Context, id int64) error {
+func (c *Repository) Delete(ctx context.Context, id int64) error {
 	builderDelete := sq.Delete(chatTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{colID: id})
@@ -59,7 +62,12 @@ func (c *ChatRepository) Delete(ctx context.Context, id int64) error {
 		log.Fatalf("failed to build query: %v", err)
 	}
 
-	_, err = c.pool.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "chat_repository.Delete",
+		QueryRaw: query,
+	}
+
+	_, err = c.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}

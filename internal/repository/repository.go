@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/GalichAnton/chat-server/internal/models/chat"
+	"github.com/GalichAnton/chat-server/internal/models/log"
 	"github.com/GalichAnton/chat-server/internal/models/message"
 	"github.com/GalichAnton/chat-server/internal/models/user"
 )
@@ -22,4 +23,9 @@ type UserRepository interface {
 // MessageRepository - .
 type MessageRepository interface {
 	SendMessage(ctx context.Context, message *message.Info) error
+}
+
+// LogRepository - .
+type LogRepository interface {
+	Create(ctx context.Context, log *log.Info) error
 }
