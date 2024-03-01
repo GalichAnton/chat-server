@@ -3,8 +3,8 @@ package message
 import (
 	"context"
 
-	"github.com/GalichAnton/chat-server/internal/client/db"
 	modelService "github.com/GalichAnton/chat-server/internal/models/message"
+	"github.com/GalichAnton/platform_common/pkg/db"
 	sq "github.com/Masterminds/squirrel"
 )
 
