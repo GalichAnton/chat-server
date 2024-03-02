@@ -1,9 +1,9 @@
 package user
 
 import (
-	"github.com/GalichAnton/chat-server/internal/client/db"
 	"github.com/GalichAnton/chat-server/internal/repository"
 	"github.com/GalichAnton/chat-server/internal/services"
+	"github.com/GalichAnton/platform_common/pkg/db"
 )
 
 var _ services.ChatService = (*service)(nil)

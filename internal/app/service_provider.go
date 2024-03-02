@@ -5,10 +5,6 @@ import (
 	"log"
 
 	"github.com/GalichAnton/chat-server/internal/api/chat"
-	"github.com/GalichAnton/chat-server/internal/client/db"
-	"github.com/GalichAnton/chat-server/internal/client/db/pg"
-	"github.com/GalichAnton/chat-server/internal/client/db/transaction"
-	"github.com/GalichAnton/chat-server/internal/closer"
 	"github.com/GalichAnton/chat-server/internal/config"
 	"github.com/GalichAnton/chat-server/internal/config/env"
 	"github.com/GalichAnton/chat-server/internal/repository"
@@ -19,6 +15,10 @@ import (
 	"github.com/GalichAnton/chat-server/internal/services"
 	chatService "github.com/GalichAnton/chat-server/internal/services/chat"
 	messageService "github.com/GalichAnton/chat-server/internal/services/message"
+	"github.com/GalichAnton/platform_common/pkg/closer"
+	"github.com/GalichAnton/platform_common/pkg/db"
+	"github.com/GalichAnton/platform_common/pkg/db/pg"
+	"github.com/GalichAnton/platform_common/pkg/db/transaction"
 )
 
 type serviceProvider struct {

@@ -4,14 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/GalichAnton/chat-server/internal/client/db"
 	serviceModel "github.com/GalichAnton/chat-server/internal/models/log"
+	"github.com/GalichAnton/platform_common/pkg/db"
 	sq "github.com/Masterminds/squirrel"
 )
 
 const (
 	tableName     = "logs"
-	colID         = "id"
 	colAction     = "action"
 	colEntityID   = "entity_id"
 	colEntityType = "entity_type"

@@ -34,6 +34,9 @@ func (s *service) Create(ctx context.Context, chat *modelService.Info) (int64, e
 			return nil
 		},
 	)
+	if err != nil {
+		return 0, err
+	}
 
 	for _, user := range chat.Users {
 		newUser := chatUser.User{
