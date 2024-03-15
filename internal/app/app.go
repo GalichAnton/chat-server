@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/GalichAnton/chat-server/internal/config"
+	"github.com/GalichAnton/chat-server/internal/interceptor"
 	desc "github.com/GalichAnton/chat-server/pkg/chat_v1"
 	"github.com/GalichAnton/platform_common/pkg/closer"
 	"google.golang.org/grpc"
@@ -82,7 +83,10 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+	a.grpcServer = grpc.NewServer(
+		grpc.Creds(insecure.NewCredentials()),
+		grpc.UnaryInterceptor(interceptor.AuthInterceptor),
+	)
 
 	reflection.Register(a.grpcServer)
 
