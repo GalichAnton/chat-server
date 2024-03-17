@@ -1,38 +1,30 @@
-package interceptor
+package access
 
 import (
 	"context"
 
 	authPB "github.com/GalichAnton/auth/pkg/access_v1"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
 const (
 	accessToken = ""
-	authAddress = "localhost:50051"
 )
 
-// AuthInterceptor ...
-func AuthInterceptor(
+// Access ...
+func (i *accessInterceptor) Access(
 	ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
 	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	conn, err := grpc.DialContext(ctx, authAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	client, err := i.client.AccessClient(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	defer func(conn *grpc.ClientConn) {
-		_ = conn.Close()
-	}(conn)
-
-	authClient := authPB.NewAccessV1Client(conn)
-
-	_, err = authClient.Check(
+	_, err = client.Check(
 		ctx, &authPB.CheckRequest{
 			EndpointAddress: info.FullMethod,
 		},
