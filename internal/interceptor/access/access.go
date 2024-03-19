@@ -19,12 +19,7 @@ func (i *accessInterceptor) Access(
 	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	client, err := i.client.AccessClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = client.Check(
+	_, err = i.client.Check(
 		ctx, &authPB.CheckRequest{
 			EndpointAddress: info.FullMethod,
 		},

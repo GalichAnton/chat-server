@@ -4,9 +4,14 @@ import (
 	"context"
 	"log"
 
+	access "github.com/GalichAnton/auth/pkg/access_v1"
 	"github.com/GalichAnton/chat-server/internal/api/chat"
+	"github.com/GalichAnton/chat-server/internal/client"
+	accessClient "github.com/GalichAnton/chat-server/internal/client/rpc/access"
 	"github.com/GalichAnton/chat-server/internal/config"
 	"github.com/GalichAnton/chat-server/internal/config/env"
+	"github.com/GalichAnton/chat-server/internal/interceptor"
+	accessInterceptor "github.com/GalichAnton/chat-server/internal/interceptor/access"
 	"github.com/GalichAnton/chat-server/internal/repository"
 	chatRepository "github.com/GalichAnton/chat-server/internal/repository/chat"
 	logRepository "github.com/GalichAnton/chat-server/internal/repository/log"
@@ -19,7 +24,11 @@ import (
 	"github.com/GalichAnton/platform_common/pkg/db"
 	"github.com/GalichAnton/platform_common/pkg/db/pg"
 	"github.com/GalichAnton/platform_common/pkg/db/transaction"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
+
+const authAddress = "localhost:50051"
 
 type serviceProvider struct {
 	pgConfig   config.PGConfig
@@ -35,7 +44,9 @@ type serviceProvider struct {
 	chatService    services.ChatService
 	messageService services.MessageService
 
-	chatImpl *chat.Implementation
+	chatImpl          *chat.Implementation
+	accessClient      client.AccessClient
+	accessInterceptor interceptor.AccessInterceptor
 }
 
 func newServiceProvider() *serviceProvider {
@@ -154,4 +165,32 @@ func (s *serviceProvider) ChatImpl(ctx context.Context) *chat.Implementation {
 	}
 
 	return s.chatImpl
+}
+
+func (s *serviceProvider) AccessClient(ctx context.Context) (client.AccessClient, error) {
+	if s.accessClient == nil {
+		conn, err := grpc.DialContext(ctx, authAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			return nil, err
+		}
+
+		closer.Add(conn.Close)
+
+		s.accessClient = accessClient.NewAccessClient(access.NewAccessV1Client(conn))
+	}
+
+	return s.accessClient, nil
+}
+
+func (s *serviceProvider) AccessInterceptor(ctx context.Context) interceptor.AccessInterceptor {
+	if s.accessInterceptor == nil {
+		newClient, err := s.AccessClient(ctx)
+		if err != nil {
+			log.Fatalf("AccessClient error")
+		}
+
+		s.accessInterceptor = accessInterceptor.NewAccessInterceptor(newClient)
+	}
+
+	return s.accessInterceptor
 }

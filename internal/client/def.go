@@ -3,10 +3,11 @@ package client
 import (
 	"context"
 
-	authPB "github.com/GalichAnton/auth/pkg/access_v1"
+	access "github.com/GalichAnton/auth/pkg/access_v1"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// RPCClient ...
-type RPCClient interface {
-	AccessClient(ctx context.Context) (authPB.AccessV1Client, error)
+// AccessClient ...
+type AccessClient interface {
+	Check(ctx context.Context, req *access.CheckRequest) (*emptypb.Empty, error)
 }
