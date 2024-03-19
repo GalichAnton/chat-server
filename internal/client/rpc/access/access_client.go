@@ -4,7 +4,6 @@ import (
 	"context"
 
 	access "github.com/GalichAnton/auth/pkg/access_v1"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type accessClient struct {
@@ -18,11 +17,15 @@ func NewAccessClient(client access.AccessV1Client) *accessClient {
 	}
 }
 
-func (a *accessClient) Check(ctx context.Context, req *access.CheckRequest) (*emptypb.Empty, error) {
-	_, err := a.client.Check(ctx, req)
+func (a *accessClient) Check(ctx context.Context, address string) error {
+	_, err := a.client.Check(
+		ctx, &access.CheckRequest{
+			EndpointAddress: address,
+		},
+	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &emptypb.Empty{}, nil
+	return nil
 }

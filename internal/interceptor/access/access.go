@@ -3,7 +3,6 @@ package access
 import (
 	"context"
 
-	authPB "github.com/GalichAnton/auth/pkg/access_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -19,11 +18,7 @@ func (i *accessInterceptor) Access(
 	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	_, err = i.client.Check(
-		ctx, &authPB.CheckRequest{
-			EndpointAddress: info.FullMethod,
-		},
-	)
+	err = i.client.Check(ctx, info.FullMethod)
 	if err != nil {
 		return nil, err
 	}

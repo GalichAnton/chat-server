@@ -167,11 +167,11 @@ func (s *serviceProvider) ChatImpl(ctx context.Context) *chat.Implementation {
 	return s.chatImpl
 }
 
-func (s *serviceProvider) AccessClient(ctx context.Context) (client.AccessClient, error) {
+func (s *serviceProvider) AccessClient(ctx context.Context) client.AccessClient {
 	if s.accessClient == nil {
 		conn, err := grpc.DialContext(ctx, authAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
-			return nil, err
+			log.Fatalf("init AccessClient error")
 		}
 
 		closer.Add(conn.Close)
@@ -179,17 +179,12 @@ func (s *serviceProvider) AccessClient(ctx context.Context) (client.AccessClient
 		s.accessClient = accessClient.NewAccessClient(access.NewAccessV1Client(conn))
 	}
 
-	return s.accessClient, nil
+	return s.accessClient
 }
 
 func (s *serviceProvider) AccessInterceptor(ctx context.Context) interceptor.AccessInterceptor {
 	if s.accessInterceptor == nil {
-		newClient, err := s.AccessClient(ctx)
-		if err != nil {
-			log.Fatalf("AccessClient error")
-		}
-
-		s.accessInterceptor = accessInterceptor.NewAccessInterceptor(newClient)
+		s.accessInterceptor = accessInterceptor.NewAccessInterceptor(s.AccessClient(ctx))
 	}
 
 	return s.accessInterceptor
