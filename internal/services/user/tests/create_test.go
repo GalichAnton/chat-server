@@ -28,13 +28,13 @@ func TestCreate(t *testing.T) {
 		mc  = minimock.NewController(t)
 
 		id     = gofakeit.Int64()
-		chatId = gofakeit.Int64()
+		chatID = gofakeit.Int64()
 		name   = gofakeit.Name()
 
 		repoErr = fmt.Errorf("repo error")
 
 		user = &chatUser.User{
-			ChatID: chatId,
+			ChatID: chatID,
 			Name:   name,
 		}
 	)

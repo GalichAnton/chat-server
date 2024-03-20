@@ -13,5 +13,5 @@ type Log struct {
 type LogInfo struct {
 	Action     string `db:"action"`
 	EntityID   int64  `db:"entity_id"`
-	EntityType string `db:"entity_type"'`
+	EntityType string `db:"entity_type"`
 }
