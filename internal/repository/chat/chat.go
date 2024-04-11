@@ -26,7 +26,7 @@ func NewChatRepository(db db.Client) *Repository {
 }
 
 // Create - .
-func (c *Repository) Create(ctx context.Context, chat *modelService.Info) (int64, error) {
+func (r *Repository) Create(ctx context.Context, chat *modelService.Info) (int64, error) {
 	builderInsert := sq.Insert(chatTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(colOwner).
@@ -43,7 +43,7 @@ func (c *Repository) Create(ctx context.Context, chat *modelService.Info) (int64
 		QueryRaw: query,
 	}
 	var chatID int64
-	err = c.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
 	if err != nil {
 		return 0, err
 	}
@@ -52,7 +52,7 @@ func (c *Repository) Create(ctx context.Context, chat *modelService.Info) (int64
 }
 
 // Delete - .
-func (c *Repository) Delete(ctx context.Context, id int64) error {
+func (r *Repository) Delete(ctx context.Context, id int64) error {
 	builderDelete := sq.Delete(chatTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{colID: id})
@@ -67,10 +67,35 @@ func (c *Repository) Delete(ctx context.Context, id int64) error {
 		QueryRaw: query,
 	}
 
-	_, err = c.db.DB().ExecContext(ctx, q, args...)
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// GetChats ...
+func (r *Repository) GetChats(ctx context.Context) ([]int64, error) {
+	builderSelect := sq.Select(colID).
+		From(chatTableName).
+		PlaceholderFormat(sq.Dollar)
+
+	query, args, err := builderSelect.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "chat_repository.GetChats",
+		QueryRaw: query,
+	}
+
+	var ids []int64
+	err = r.db.DB().ScanAllContext(ctx, &ids, q, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return ids, nil
 }

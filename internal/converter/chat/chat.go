@@ -8,7 +8,11 @@ import (
 // ToServiceChatInfo ...
 func ToServiceChatInfo(info *desc.ChatInfo) *modelService.Info {
 	return &modelService.Info{
-		Owner: info.Owner,
 		Users: info.Usernames,
 	}
+}
+
+// ToStreamFromDesc ...
+func ToStreamFromDesc(stream desc.ChatV1_ConnectServer) modelService.Stream {
+	return stream.(modelService.Stream)
 }

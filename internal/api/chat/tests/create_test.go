@@ -39,7 +39,6 @@ func TestCreate(t *testing.T) {
 		req = &desc.CreateRequest{
 			Info: &desc.ChatInfo{
 				Usernames: users,
-				Owner:     owner,
 			},
 		}
 

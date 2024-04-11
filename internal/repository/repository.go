@@ -13,6 +13,7 @@ import (
 type ChatRepository interface {
 	Create(ctx context.Context, chat *chat.Info) (int64, error)
 	Delete(ctx context.Context, id int64) error
+	GetChats(ctx context.Context) ([]int64, error)
 }
 
 // UserRepository - .

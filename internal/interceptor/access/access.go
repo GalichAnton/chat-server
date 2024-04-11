@@ -2,23 +2,22 @@ package access
 
 import (
 	"context"
+	"errors"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-)
-
-const (
-	accessToken = ""
 )
 
 // Access ...
 func (i *accessInterceptor) Access(
 	ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
-	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
-	ctx = metadata.NewOutgoingContext(ctx, md)
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, errors.New("metadata is not provided")
+	}
 
-	err = i.client.Check(ctx, info.FullMethod)
+	err = i.client.Check(metadata.NewOutgoingContext(ctx, md), info.FullMethod)
 	if err != nil {
 		return nil, err
 	}

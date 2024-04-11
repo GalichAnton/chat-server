@@ -1,10 +1,16 @@
-package user
+package chat
 
 import (
+	"sync"
+
+	chatModel "github.com/GalichAnton/chat-server/internal/models/chat"
 	"github.com/GalichAnton/chat-server/internal/repository"
+	"github.com/GalichAnton/chat-server/internal/repository/message/model"
 	"github.com/GalichAnton/chat-server/internal/services"
 	"github.com/GalichAnton/platform_common/pkg/db"
 )
+
+const messagesBuffer = 100
 
 var _ services.ChatService = (*service)(nil)
 
@@ -13,6 +19,17 @@ type service struct {
 	userRepository repository.UserRepository
 	logRepository  repository.LogRepository
 	txManager      db.TxManager
+
+	channels   map[int64]chan *model.Message
+	mxChannels sync.RWMutex
+
+	chats  map[int64]*chat
+	mxChat sync.RWMutex
+}
+
+type chat struct {
+	streams map[string]chatModel.Stream
+	m       sync.RWMutex
 }
 
 // NewService ...
@@ -27,5 +44,7 @@ func NewService(
 		userRepository: userRepository,
 		logRepository:  logRepository,
 		txManager:      txManager,
+		chats:          make(map[int64]*chat),
+		channels:       make(map[int64]chan *model.Message),
 	}
 }

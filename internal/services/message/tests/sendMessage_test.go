@@ -28,7 +28,7 @@ func TestSendMessage(t *testing.T) {
 		mc  = minimock.NewController(t)
 
 		chatID = gofakeit.Int64()
-		from   = gofakeit.Int64()
+		from   = gofakeit.Email()
 		text   = gofakeit.Animal()
 
 		repoErr = fmt.Errorf("repo error")
