@@ -29,8 +29,7 @@ func TestCreate(t *testing.T) {
 		ctx = context.Background()
 		mc  = minimock.NewController(t)
 
-		id    = gofakeit.Int64()
-		owner = gofakeit.Int64()
+		id = gofakeit.Int64()
 
 		users = []string{gofakeit.Name(), gofakeit.Name()}
 
@@ -43,7 +42,6 @@ func TestCreate(t *testing.T) {
 		}
 
 		chatInfo = &chat.Info{
-			Owner: owner,
 			Users: users,
 		}
 
