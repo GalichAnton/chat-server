@@ -2,8 +2,6 @@ module github.com/GalichAnton/chat-server
 
 go 1.21
 
-toolchain go1.21.1
-
 require (
 	github.com/GalichAnton/auth v0.0.0-20240314155236-008196a87a57
 	github.com/GalichAnton/platform_common v0.0.0-20240301110738-01c0e9fecd54
