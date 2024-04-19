@@ -12,6 +12,6 @@ type Message struct {
 // Info - .
 type Info struct {
 	ChatID  int64  `db:"chat_id"`
-	From    int64  `db:"user_id"`
+	From    string `db:"user_id"`
 	Content string `db:"content"`
 }

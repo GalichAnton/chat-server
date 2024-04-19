@@ -53,6 +53,7 @@ func (a *App) initDeps(ctx context.Context) error {
 		a.initConfig,
 		a.initServiceProvider,
 		a.initGRPCServer,
+		a.initChatChannels,
 	}
 
 	for _, f := range inits {
@@ -92,6 +93,10 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	desc.RegisterChatV1Server(a.grpcServer, a.serviceProvider.ChatImpl(ctx))
 
 	return nil
+}
+
+func (a *App) initChatChannels(ctx context.Context) error {
+	return a.serviceProvider.ChatService(ctx).InitChannels(ctx)
 }
 
 func (a *App) runGRPCServer() error {

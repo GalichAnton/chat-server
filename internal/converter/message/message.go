@@ -9,7 +9,6 @@ import (
 func ToServiceMessageInfo(info *desc.MessageInfo) *modelService.Info {
 	return &modelService.Info{
 		From:    info.From,
-		ChatID:  info.ChatId,
 		Content: info.Text,
 	}
 }

@@ -32,8 +32,7 @@ func TestSendMessage(t *testing.T) {
 		ctx = context.Background()
 		mc  = minimock.NewController(t)
 
-		from       = gofakeit.Int64()
-		chatID     = gofakeit.Int64()
+		from       = gofakeit.Email()
 		text       = gofakeit.Animal()
 		serviceErr = fmt.Errorf("service error")
 
@@ -42,12 +41,10 @@ func TestSendMessage(t *testing.T) {
 				From:   from,
 				Text:   text,
 				SentAt: timestamppb.New(time.Now()),
-				ChatId: chatID,
 			},
 		}
 
 		messageInfo = &message.Info{
-			ChatID:  chatID,
 			Content: text,
 			From:    from,
 		}
