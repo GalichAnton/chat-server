@@ -17,7 +17,7 @@ type UserService interface {
 type ChatService interface {
 	Create(ctx context.Context, chat *chat.Info) (int64, error)
 	Delete(ctx context.Context, id int64) error
-	Connect(chatID int64, username string, stream chat.Stream) error
+	Connect(chatID int64) (<-chan *message.Message, error)
 	InitChannels(ctx context.Context) error
 }
 

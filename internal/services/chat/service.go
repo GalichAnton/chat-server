@@ -3,7 +3,6 @@ package chat
 import (
 	"sync"
 
-	chatModel "github.com/GalichAnton/chat-server/internal/models/chat"
 	"github.com/GalichAnton/chat-server/internal/repository"
 	"github.com/GalichAnton/chat-server/internal/repository/message/model"
 	"github.com/GalichAnton/chat-server/internal/services"
@@ -28,7 +27,7 @@ type service struct {
 }
 
 type chat struct {
-	streams map[string]chatModel.Stream
+	streams map[string]*model.Message
 	m       sync.RWMutex
 }
 

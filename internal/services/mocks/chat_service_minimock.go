@@ -11,6 +11,7 @@ import (
 	mm_time "time"
 
 	"github.com/GalichAnton/chat-server/internal/models/chat"
+	"github.com/GalichAnton/chat-server/internal/models/message"
 	"github.com/gojuno/minimock/v3"
 )
 
@@ -19,8 +20,8 @@ type ChatServiceMock struct {
 	t          minimock.Tester
 	finishOnce sync.Once
 
-	funcConnect          func(chatID int64, username string, stream chat.Stream) (err error)
-	inspectFuncConnect   func(chatID int64, username string, stream chat.Stream)
+	funcConnect          func(chatID int64) (ch1 <-chan *message.Message, err error)
+	inspectFuncConnect   func(chatID int64)
 	afterConnectCounter  uint64
 	beforeConnectCounter uint64
 	ConnectMock          mChatServiceMockConnect
@@ -88,18 +89,17 @@ type ChatServiceMockConnectExpectation struct {
 
 // ChatServiceMockConnectParams contains parameters of the ChatService.Connect
 type ChatServiceMockConnectParams struct {
-	chatID   int64
-	username string
-	stream   chat.Stream
+	chatID int64
 }
 
 // ChatServiceMockConnectResults contains results of the ChatService.Connect
 type ChatServiceMockConnectResults struct {
+	ch1 <-chan *message.Message
 	err error
 }
 
 // Expect sets up expected params for ChatService.Connect
-func (mmConnect *mChatServiceMockConnect) Expect(chatID int64, username string, stream chat.Stream) *mChatServiceMockConnect {
+func (mmConnect *mChatServiceMockConnect) Expect(chatID int64) *mChatServiceMockConnect {
 	if mmConnect.mock.funcConnect != nil {
 		mmConnect.mock.t.Fatalf("ChatServiceMock.Connect mock is already set by Set")
 	}
@@ -108,7 +108,7 @@ func (mmConnect *mChatServiceMockConnect) Expect(chatID int64, username string, 
 		mmConnect.defaultExpectation = &ChatServiceMockConnectExpectation{}
 	}
 
-	mmConnect.defaultExpectation.params = &ChatServiceMockConnectParams{chatID, username, stream}
+	mmConnect.defaultExpectation.params = &ChatServiceMockConnectParams{chatID}
 	for _, e := range mmConnect.expectations {
 		if minimock.Equal(e.params, mmConnect.defaultExpectation.params) {
 			mmConnect.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmConnect.defaultExpectation.params)
@@ -119,7 +119,7 @@ func (mmConnect *mChatServiceMockConnect) Expect(chatID int64, username string, 
 }
 
 // Inspect accepts an inspector function that has same arguments as the ChatService.Connect
-func (mmConnect *mChatServiceMockConnect) Inspect(f func(chatID int64, username string, stream chat.Stream)) *mChatServiceMockConnect {
+func (mmConnect *mChatServiceMockConnect) Inspect(f func(chatID int64)) *mChatServiceMockConnect {
 	if mmConnect.mock.inspectFuncConnect != nil {
 		mmConnect.mock.t.Fatalf("Inspect function is already set for ChatServiceMock.Connect")
 	}
@@ -130,7 +130,7 @@ func (mmConnect *mChatServiceMockConnect) Inspect(f func(chatID int64, username 
 }
 
 // Return sets up results that will be returned by ChatService.Connect
-func (mmConnect *mChatServiceMockConnect) Return(err error) *ChatServiceMock {
+func (mmConnect *mChatServiceMockConnect) Return(ch1 <-chan *message.Message, err error) *ChatServiceMock {
 	if mmConnect.mock.funcConnect != nil {
 		mmConnect.mock.t.Fatalf("ChatServiceMock.Connect mock is already set by Set")
 	}
@@ -138,12 +138,12 @@ func (mmConnect *mChatServiceMockConnect) Return(err error) *ChatServiceMock {
 	if mmConnect.defaultExpectation == nil {
 		mmConnect.defaultExpectation = &ChatServiceMockConnectExpectation{mock: mmConnect.mock}
 	}
-	mmConnect.defaultExpectation.results = &ChatServiceMockConnectResults{err}
+	mmConnect.defaultExpectation.results = &ChatServiceMockConnectResults{ch1, err}
 	return mmConnect.mock
 }
 
 // Set uses given function f to mock the ChatService.Connect method
-func (mmConnect *mChatServiceMockConnect) Set(f func(chatID int64, username string, stream chat.Stream) (err error)) *ChatServiceMock {
+func (mmConnect *mChatServiceMockConnect) Set(f func(chatID int64) (ch1 <-chan *message.Message, err error)) *ChatServiceMock {
 	if mmConnect.defaultExpectation != nil {
 		mmConnect.mock.t.Fatalf("Default expectation is already set for the ChatService.Connect method")
 	}
@@ -158,35 +158,35 @@ func (mmConnect *mChatServiceMockConnect) Set(f func(chatID int64, username stri
 
 // When sets expectation for the ChatService.Connect which will trigger the result defined by the following
 // Then helper
-func (mmConnect *mChatServiceMockConnect) When(chatID int64, username string, stream chat.Stream) *ChatServiceMockConnectExpectation {
+func (mmConnect *mChatServiceMockConnect) When(chatID int64) *ChatServiceMockConnectExpectation {
 	if mmConnect.mock.funcConnect != nil {
 		mmConnect.mock.t.Fatalf("ChatServiceMock.Connect mock is already set by Set")
 	}
 
 	expectation := &ChatServiceMockConnectExpectation{
 		mock:   mmConnect.mock,
-		params: &ChatServiceMockConnectParams{chatID, username, stream},
+		params: &ChatServiceMockConnectParams{chatID},
 	}
 	mmConnect.expectations = append(mmConnect.expectations, expectation)
 	return expectation
 }
 
 // Then sets up ChatService.Connect return parameters for the expectation previously defined by the When method
-func (e *ChatServiceMockConnectExpectation) Then(err error) *ChatServiceMock {
-	e.results = &ChatServiceMockConnectResults{err}
+func (e *ChatServiceMockConnectExpectation) Then(ch1 <-chan *message.Message, err error) *ChatServiceMock {
+	e.results = &ChatServiceMockConnectResults{ch1, err}
 	return e.mock
 }
 
 // Connect implements services.ChatService
-func (mmConnect *ChatServiceMock) Connect(chatID int64, username string, stream chat.Stream) (err error) {
+func (mmConnect *ChatServiceMock) Connect(chatID int64) (ch1 <-chan *message.Message, err error) {
 	mm_atomic.AddUint64(&mmConnect.beforeConnectCounter, 1)
 	defer mm_atomic.AddUint64(&mmConnect.afterConnectCounter, 1)
 
 	if mmConnect.inspectFuncConnect != nil {
-		mmConnect.inspectFuncConnect(chatID, username, stream)
+		mmConnect.inspectFuncConnect(chatID)
 	}
 
-	mm_params := ChatServiceMockConnectParams{chatID, username, stream}
+	mm_params := ChatServiceMockConnectParams{chatID}
 
 	// Record call args
 	mmConnect.ConnectMock.mutex.Lock()
@@ -196,14 +196,14 @@ func (mmConnect *ChatServiceMock) Connect(chatID int64, username string, stream 
 	for _, e := range mmConnect.ConnectMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.err
+			return e.results.ch1, e.results.err
 		}
 	}
 
 	if mmConnect.ConnectMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmConnect.ConnectMock.defaultExpectation.Counter, 1)
 		mm_want := mmConnect.ConnectMock.defaultExpectation.params
-		mm_got := ChatServiceMockConnectParams{chatID, username, stream}
+		mm_got := ChatServiceMockConnectParams{chatID}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmConnect.t.Errorf("ChatServiceMock.Connect got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -212,12 +212,12 @@ func (mmConnect *ChatServiceMock) Connect(chatID int64, username string, stream 
 		if mm_results == nil {
 			mmConnect.t.Fatal("No results are set for the ChatServiceMock.Connect")
 		}
-		return (*mm_results).err
+		return (*mm_results).ch1, (*mm_results).err
 	}
 	if mmConnect.funcConnect != nil {
-		return mmConnect.funcConnect(chatID, username, stream)
+		return mmConnect.funcConnect(chatID)
 	}
-	mmConnect.t.Fatalf("Unexpected call to ChatServiceMock.Connect. %v %v %v", chatID, username, stream)
+	mmConnect.t.Fatalf("Unexpected call to ChatServiceMock.Connect. %v", chatID)
 	return
 }
 

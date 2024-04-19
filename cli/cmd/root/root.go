@@ -45,9 +45,10 @@ var loginCmd = &cobra.Command{
 		err = login(context.Background(), addr)
 		if err != nil {
 			log.Printf("failed to login: %v", err)
-		} else {
-			fmt.Println(color.GreenString("\n\n[Successfully logged in]\n"))
+			return
 		}
+
+		fmt.Println(color.GreenString("\n\n[Successfully logged in]\n"))
 	},
 }
 
@@ -58,9 +59,10 @@ var logoutCmd = &cobra.Command{
 		err := logout()
 		if err != nil {
 			log.Printf("failed to logout: %v", err)
-		} else {
-			fmt.Println(color.GreenString("\n\n[Successfully logged out]\n"))
+			return
 		}
+
+		fmt.Println(color.GreenString("\n\n[Successfully logged out]\n"))
 	},
 }
 
@@ -96,9 +98,10 @@ var createChatCmd = &cobra.Command{
 		id, err := createChat(context.Background(), addr, strings.Split(users, ","))
 		if err != nil {
 			log.Printf("failed to create chat: %v", err)
-		} else {
-			fmt.Printf("[%s %s]\n", color.CyanString("Created chat with id"), color.BlueString(strconv.Itoa(int(id))))
+			return
 		}
+
+		fmt.Printf("[%s %s]\n", color.CyanString("Created chat with id"), color.BlueString(strconv.Itoa(int(id))))
 	},
 }
 
@@ -124,9 +127,9 @@ var deleteChatCmd = &cobra.Command{
 		err = deleteChat(context.Background(), addr, intID)
 		if err != nil {
 			log.Printf("failed to delete chat: %v", err)
-		} else {
-			fmt.Printf("[%s %s]\n", color.CyanString("Deleted chat (if existed)"), color.YellowString(id))
 		}
+
+		fmt.Printf("[%s %s]\n", color.CyanString("Deleted chat (if existed)"), color.YellowString(id))
 	},
 }
 
